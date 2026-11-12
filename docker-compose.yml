@@ -1,0 +1,34 @@
+services:
+  demo-mcp:
+    build: ./demo-mcp
+    ports:
+      - "8100:8100"
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      ADMIN_USERNAME: admin
+      ADMIN_API_KEY: dev-admin-key
+      DATABASE_URL: sqlite:///./data/gateway_v2.db
+      CORS_ORIGINS: http://localhost:3001,http://127.0.0.1:3001,http://localhost:3000,http://127.0.0.1:3000
+      DEMO_MCP_URL: http://demo-mcp:8100/mcp
+    volumes:
+      - gateway-data:/app/data
+    depends_on:
+      - demo-mcp
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3001:3000"
+    environment:
+      INTERNAL_API_URL: http://backend:8000
+      NEXT_PUBLIC_API_BASE: /gw
+      NEXT_PUBLIC_DEMO_MCP_URL: http://demo-mcp:8100/mcp
+    depends_on:
+      - backend
+
+volumes:
+  gateway-data:
